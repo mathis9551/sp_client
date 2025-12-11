@@ -3,7 +3,7 @@ import {Text, TouchableOpacity, View} from 'react-native';
 import {useNavigation} from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store"
 
-export default function PasserCommande() {
+export default function CommandeContext() {
     const navigation = useNavigation();
     return (
         <View>

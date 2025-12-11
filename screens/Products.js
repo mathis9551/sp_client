@@ -89,13 +89,14 @@ const Products = () => {
                     >
 
                         <Image
-                            source={{ uri:`${EXPO_PUBLIC_API_URL}` +  item.imageUrl }}
+                            source={{ uri:`${EXPO_PUBLIC_API_URL}` + "/images/produits/" + item.imageUrl }}
                             style={GlobalStyles.productImage}
                         />
 
                         <Text style={GlobalStyles.productName}>{item.designation}</Text>
 
                         <Text style={GlobalStyles.productPrice}>{item.prix_unitaire_HT} €</Text>
+
                     </TouchableOpacity>
                 )}
             />

@@ -245,7 +245,7 @@ const Profil = () => {
                                     marginBottom: 10
                                 }}>
                                     <Image
-                                        source={{ uri: `${EXPO_PUBLIC_API_URL}`+ article.imageUrl }}
+                                        source={{ uri: `${EXPO_PUBLIC_API_URL}`+ "/images/produits/" + article.imageUrl }}
 
                                         style={{ width: 40, height: 40, borderRadius: 5, marginRight: 10 }}
                                     />

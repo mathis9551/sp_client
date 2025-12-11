@@ -146,7 +146,7 @@ export default function Home() {
                                     <TouchableOpacity onPress={() => navigation.navigate("ProductsCard", item)}>
                                         <View style={styles.productCardHorizontal}>
                                             <Image
-                                                source={{ uri:`${EXPO_PUBLIC_API_URL}` +  item.imageUrl }}
+                                                source={{ uri:`${EXPO_PUBLIC_API_URL}` + "/images/produits/" +  item.imageUrl }}
                                                 style={styles.productImageHorizontal}
                                             />
                                         </View>
@@ -173,12 +173,12 @@ export default function Home() {
                             snapToInterval={snapInterval}
                             decelerationRate="fast"
                             renderItem={({ item }) => (
-                                console.log("ITEM :", item),   // ← EXACTEMENT ICI
+
                                 <View style={[styles.cardWrapper, { width: cardWidth }]}>
                                     <TouchableOpacity onPress={() => navigation.navigate("ProductsCard", item)}>
                                         <View style={styles.productCardHorizontal}>
                                             <Image
-                                                source={{ uri:`${EXPO_PUBLIC_API_URL}`+ item.imageUrl }}
+                                                source={{ uri:`${EXPO_PUBLIC_API_URL}`+"/images/produits/" + item.imageUrl }}
                                                 style={styles.productImageHorizontal}
                                             />
                                         </View>

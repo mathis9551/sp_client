@@ -8,14 +8,27 @@ import {EXPO_PUBLIC_API_URL} from "../config";
 const ProductsCard = () => {
     const route = useRoute();
     const product = route.params;
+    // --- LOGIQUE DE PRIX DÉDIÉE ---
+    // 1. Convertir les prix en nombres pour une comparaison sûre.
+    // Utiliser 0 comme valeur de secours si la conversion échoue.
+    const prixNormal = Number(product.prix_unitaire_HT || product.prix_initiale || 0);
+    const nouveauPrix = Number(product.nouveau_prix || 0);
 
-    if (!product) {
-        return (
-            <View style={GlobalStyles.container}>
-                <Text style={GlobalStyles.errorText}>Produit non trouvé.</Text>
-            </View>
-        );
-    }
+    // 2. Définir si la promotion est active :
+    // - Les deux prix doivent être > 0
+    // - Le prix normal doit être strictement supérieur au nouveau prix
+    const hasPromotion = (prixNormal > 0 && nouveauPrix > 0) && (prixNormal > nouveauPrix);
+
+    // 3. Définir le prix affiché (le nouveau prix si promo, sinon le prix normal)
+    const prixAffiche = hasPromotion ? nouveauPrix : prixNormal;
+    // ---------------------------------
+
+    // (Optionnel : Fonction pour formater le prix avec deux décimales, si nécessaire)
+    const formatPrice = (price) => {
+        if (isNaN(price)) return 'N/D';
+        return price.toFixed(2).replace('.', ',');
+    };
+
 
     return (
         <ScrollView style={styles.cardScreen}>
@@ -23,7 +36,7 @@ const ProductsCard = () => {
 
                 <Image
                    // prend image ou sinon l'image par defaul
-                    source={{ uri: product.imageUrl ? `${EXPO_PUBLIC_API_URL}${product.imageUrl}` : defaultImage }}
+                    source={{ uri: product.imageUrl ? `${EXPO_PUBLIC_API_URL}` + "/images/produits/" + `${product.imageUrl}` : defaultImage }}
                     style={styles.productDetailImage}
                 />
 
@@ -31,7 +44,26 @@ const ProductsCard = () => {
                 <Text style={styles.productDetailName}>{product.designation}</Text>
 
                 {/* Prix */}
-                <Text style={styles.productDetailPrice}>{product.prix_unitaire_HT} €</Text>
+
+
+                <View style={styles.priceContainer}>
+                    {hasPromotion && (
+                        // Affiche le prix initial barré si promotion
+                        <Text style={styles.oldPrice}>
+                            {formatPrice(prixNormal)} €
+                        </Text>
+                    )}
+
+                    {/* Affiche le prix actuel (promo ou normal) */}
+                    <Text style={[
+                        styles.productDetailPrice,
+                        // Style spécial si c'est le prix promo qui s'affiche
+                        hasPromotion && styles.promoPriceText
+                    ]}>
+                        {formatPrice(prixAffiche)} €
+                    </Text>
+                </View>
+
 
                 {/* Description */}
                 <Text style={styles.productDetailDescription}>{product.commentaire}
@@ -123,6 +155,21 @@ const styles = StyleSheet.create({
     descriptionBold: {
         fontWeight: 'bold',
         color: '#555',
+    },
+    oldPrice: {
+        fontSize: 14,
+        color: '#6c757d', // Gris
+        textDecorationLine: 'line-through', // Barré
+        marginRight: 8,
+    },
+    priceContainer: {
+        // Aligne les prix (normal/barré + nouveau) sur une seule ligne
+        flexDirection: 'row',
+        // Centre l'ensemble du bloc de prix horizontalement
+        justifyContent: 'center',
+        // Aligne les textes sur leur ligne de base pour que la ligne barrée soit bien alignée
+        alignItems: 'baseline',
+        marginBottom: 20, // Espace sous le bloc de prix
     },
 });
 

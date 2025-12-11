@@ -14,7 +14,7 @@ import Login from "../screens/Login";
 import {GlobalStyles} from "../styles/GlobalStyles";
 import useAuth from "../hooks/useAuth";
 import Profil from "../screens/Profil";
-import PasserCommande from "../screens/PasserCommande";
+import CommandeContext from "../screens/commandeContext";
 import {Alert, Text, View, Image, TouchableOpacity} from "react-native";
 
 // Création du drawer navigator
@@ -130,7 +130,7 @@ export default function PrincipalDrawer() {
 
             <Drawer.Screen name="Profil" component={Profil} options={{title: "Profil"}}/>
 
-            <Drawer.Screen name="Commande" component={PasserCommande} options={{title: "Commande"}}/>
+            <Drawer.Screen name="Commande" component={CommandeContext} options={{title: "Commande"}}/>
 
             {/* Écran de connexion - Visible UNIQUEMENT si l'utilisateur n'est PAS connecté (!isLogin) */}
             {!isAuthenticated && <Drawer.Screen name="Login" component={Login} options={{title: "Connexion"}}/>}
