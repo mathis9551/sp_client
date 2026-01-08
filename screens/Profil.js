@@ -1,26 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, Text, View, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import {ScrollView, Text, View, ActivityIndicator, Image, TouchableOpacity, StyleSheet} from 'react-native';
 import ProtectedRoute from "../components/ProtectedRoute";
 import useAuth from "../hooks/useAuth";
-import Icon from 'react-native-vector-icons/Feather'; // Importer les icônes
 import { GlobalStyles } from '../styles/GlobalStyles'; // Importer vos styles
 import {EXPO_PUBLIC_API_URL} from "../config";
 // --- Images ---
 import maleIcon from '../assets/male.jpg';
 import femaleIcon from '../assets/female.jpg';
 import otherIcon from '../assets/other.jpg';
+import { usePanier } from './store';
+import {useRoute} from "@react-navigation/native";
 
 // --- Composant d'aide pour les lignes d'info (utilise les GlobalStyles) ---
-const InfoRow = ({ icon, label, value }) => (
-    <View style={GlobalStyles.profileInfoRow}>
-        <Icon name={icon} size={22} style={GlobalStyles.profileInfoIcon} />
-        <View style={GlobalStyles.profileInfoTextContainer}>
-            <Text style={GlobalStyles.profileInfoLabel}>{label}</Text>
-            <Text style={GlobalStyles.profileInfoValue}>{value}</Text>
+const InfoRow = ({ imageSource, label, value }) => (
+    <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 8 }}>
+        <Image
+            source={imageSource}
+            style={{ width: 24, height: 24, marginRight: 12, resizeMode: 'contain' }}
+        />
+        <View>
+            <Text style={{ fontSize: 12, color: '#666' }}>{label}</Text>
+            <Text style={{ fontSize: 15, fontWeight: '500' }}>{value}</Text>
         </View>
     </View>
 );
-
 const Profil = () => {
     const { token, loading: isAuthLoading } = useAuth();
 
@@ -36,6 +39,29 @@ const Profil = () => {
     const [DerniereCommandeData, setDerniereCommandeData] = useState(null);
 
     const [NombreCommandeData, setNombreCommandeData] = useState(null);
+
+    const route = useRoute();
+    const product = route.params;
+    const { ajouterAuPanier } = usePanier();
+
+    const [isAdded, setIsAdded] = useState(false);
+
+    const handlePress = () => {
+        ajouterAuPanier({
+            designation: product.designation,
+            prix: prixAffiche,
+            imageUrl: product.imageUrl
+
+        });
+        //console.log(product.designation)
+        // Déclenche l'effet visuel
+        setIsAdded(true);
+
+        // Remet à l'état initial après 2 secondes
+        setTimeout(() => {
+            setIsAdded(false);
+        }, 2000);
+    };
 
     useEffect(() => {
         const abortController = new AbortController();
@@ -215,13 +241,34 @@ const Profil = () => {
                 {/* --- Carte d'informations --- */}
 
                 <View style={GlobalStyles.profileCard}>
-
                     <Text style={GlobalStyles.profileCardTitle}>Informations du compte</Text>
-                    <InfoRow icon="mail" label="Email" value={data.mail} />
-                    <InfoRow icon="map-pin" label="Adresse" value={data.adresse} />
-                    <InfoRow icon="map" label="Localisation" value={`${data.cp} ${data.ville}`} />
-                    <InfoRow icon="telephone" label="Telephone" value={data.telephone} />
+
+                    <InfoRow
+                        imageSource={require('../assets/mail.jpg')}
+                        label="Email"
+                        value={data.mail}
+                    />
+
+                    <InfoRow
+                        imageSource={require('../assets/adresse.jpg')}
+                        label="Adresse"
+                        value={data.adresse}
+                    />
+
+                    <InfoRow
+                        imageSource={require('../assets/localisation.jpg')}
+                        label="Localisation"
+                        value={`${data.cp} ${data.ville}`}
+                    />
+
+                    <InfoRow
+                        imageSource={require('../assets/telephone.jpg')}
+                        label="Telephone"
+                        value={data.telephone}
+                    />
                 </View>
+
+                {/* --- Module dernière commande --- */}
 
                 {DerniereCommandeData && DerniereCommandeData.length > 0 ? (
                     <View style={GlobalStyles.profileCard}>
@@ -249,29 +296,29 @@ const Profil = () => {
 
                                         style={{ width: 40, height: 40, borderRadius: 5, marginRight: 10 }}
                                     />
-                                    <View style={{ flex: 1 }}>
+                                    <View style={{ flex: 2 }}>
                                         <Text style={{ fontWeight: 'bold' }}>{article.designation}  </Text>
-                                        {/* On n'affiche pas le prix ici, car c'est le total */}
+
                                     </View>
-                                    <View style={{ flex: 1 }}>
+                                    <View style={{ flex: 2 }}>
                                         <Text style={{ fontWeight: 'bold' }}>Quantité : {article.quantite_demandee} </Text>
-                                        {/* On n'affiche pas le prix ici, car c'est le total */}
+
                                     </View>
                                     <View style={{ flex: 1 }}>
                                         <Text style={{ fontWeight: 'bold' }}>{article.total_ligne_HT} €</Text>
-                                        {/* On n'affiche pas le prix ici, car c'est le total */}
+
                                     </View>
 
                                 </View>
 
                             ))}
-                        <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+                        <Text style={{ marginVertical: 25, fontSize: 18, fontWeight: 'bold' }}>
                             Total TVA : {DerniereCommandeData[0].tva} €
                         </Text>
 
                         {/* Ligne de séparation */}
 
-                        <View style={{ height: 1, backgroundColor: '#eee', marginVertical: 15 }} />
+                        <View style={{ height: 1, backgroundColor: '#eee', marginVertical: 1 }} />
 
                         {/* 4. Pied de carte (Prix et Bouton) */}
                         <View style={{
@@ -287,6 +334,7 @@ const Profil = () => {
 
                             {/* Bouton (en bas à droite) */}
                             <TouchableOpacity
+
                                 onPress={() => alert(`Re-commander les articles du ${new Date(DerniereCommandeData[0].dateCommande).toLocaleDateString('fr-FR')}`)}
                                 style={{
                                     backgroundColor: '#007bff', // Un bleu exemple
@@ -295,7 +343,20 @@ const Profil = () => {
                                     borderRadius: 5
                                 }}
                             >
-                                <Text style={{ color: 'white', fontWeight: 'bold' }}>Re-commander</Text>
+                                <TouchableOpacity
+
+                                    style={[
+                                        styles.btnAjouter,
+                                        isAdded && { backgroundColor: '#28a745' } // Devient vert au clic
+                                    ]}
+                                    onPress={handlePress}
+                                    disabled={isAdded} // Empêche le spam pendant les 2 secondes
+                                >
+                                    <Text style={styles.btnAjouterText}>
+                                        {isAdded ? "Commande ajoutée ✅" : "Re-commander"}
+                                    </Text>
+                                </TouchableOpacity>
+
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -313,17 +374,17 @@ const Profil = () => {
                     <Text style={GlobalStyles.profileCardTitle}>Mes Statistiques</Text>
 
                     <InfoRow
-                        icon="package"
+                        imageSource={require('../assets/argent.jpg')}
                         label="Argent dépensé"
                         value={depenseData && depenseData[0] && depenseData[0].total ? `${depenseData[0].total} €` : '0 €'}
                     />
                     <InfoRow
-                        icon="package"
+                        imageSource={require('../assets/articlePref.jpg')}
                         label="Article préféré"
                         value={topArticleData && topArticleData[0] && topArticleData[0].designation ? `${topArticleData[0].designation} ` : 'pas encore d/article préféré'}
                     />
                     <InfoRow
-                        icon="package"
+                        imageSource={require('../assets/commande.jpg')}
                         label="Nombre de commande "
                         value={NombreCommandeData && NombreCommandeData[0] && NombreCommandeData[0].date ? `${NombreCommandeData[0].date} ` : 'Aucune commande'}
                     />
@@ -334,5 +395,41 @@ const Profil = () => {
     );
 
 };
+const styles = StyleSheet.create({
+    cardScreen: { flex: 1, backgroundColor: '#f0f2f5' },
+    cardContainer: {
+        backgroundColor: '#ffffff',
+        margin: 15,
+        borderRadius: 12,
+        padding: 20,
+        alignItems: 'center',
+        elevation: 5,
+    },
+    productDetailImage: { width: '100%', height: 250, resizeMode: 'contain', marginBottom: 20 },
+    productDetailName: { fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 10, textAlign: 'center' },
+    productDetailPrice: { fontSize: 28, fontWeight: 'bold', color: '#1e3c72', marginBottom: 20 },
+    productDetailDescription: { fontSize: 16, color: '#555', lineHeight: 24, marginBottom: 20 },
+    oldPrice: { fontSize: 14, color: '#6c757d', textDecorationLine: 'line-through', marginRight: 8 },
+    priceContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'baseline', marginBottom: 20 },
+    btnAjouter: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 8, // Arrondi plus subtil
+        alignSelf: 'center',
 
+    },
+
+    btnAjouterText: {
+        color: '#ffffff',
+        fontSize: 15,
+        fontWeight: '600', // Moins épais que 'bold' pour plus de finesse
+        // On retire l'uppercase et le letterSpacing qui déforment l'écriture
+        textTransform: 'none',
+        letterSpacing: 0.5,
+    },
+    promoPriceText: { color: '#d9534f' }
+});
 export default Profil;

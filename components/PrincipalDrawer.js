@@ -4,18 +4,13 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerI
 import Home from "../screens/Home";
 import Products from "../screens/Products";
 import Login from "../screens/Login";
-
-// Import du module de stockage sécurisé pour gérer le token d'authentification
-
-// Import des hooks React
-
-// Import des composants React Native
-// Import des styles globaux de l'application
 import {GlobalStyles} from "../styles/GlobalStyles";
 import useAuth from "../hooks/useAuth";
 import Profil from "../screens/Profil";
 import CommandeContext from "../screens/commandeContext";
 import {Alert, Text, View, Image, TouchableOpacity} from "react-native";
+import { useNavigation } from '@react-navigation/native';
+import { usePanier } from '../screens/store';
 
 // Création du drawer navigator
 const Drawer = createDrawerNavigator();
@@ -83,6 +78,7 @@ function CustomDrawerContent(props) {
     );
 }
 
+
 /**
  * PrincipalDrawer - Composant principal du drawer
  * Configure le Drawer Navigator avec les écrans de l'application
@@ -93,34 +89,51 @@ export default function PrincipalDrawer() {
     // État local pour savoir si l'utilisateur est connecté
 
     const {isAuthenticated} = useAuth()
-
+    const { panier } = usePanier();
+    const nombreArticles = panier.reduce((acc, item) => acc + item.quantite, 0);
 
     return (
         <Drawer.Navigator
+
             drawerContent={(props) => <CustomDrawerContent {...props} />}
-            screenOptions={{
-                /**
-                 * 1. Centre le titre de tous les écrans
-                 */
+            screenOptions={({ navigation }) => ({ // <--- On récupère navigation ici
                 headerTitleAlign: 'center',
 
-                /**
-                 * 2. Ajoute un composant à droite du header
-                 */
                 headerRight: () => (
                     <TouchableOpacity
-                        // Vous pouvez changer cette action pour naviguer vers l'écran Panier
-                        onPress={() => alert('En travaux 🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧')}
+                        onPress={() => navigation.navigate('Commande')}
+                        style={{ marginRight: 15 }}
                     >
-                        <Image
-                            source={require('../assets/panier.jpg')}
+                        <View>
+                            <Image
+                                source={require('../assets/panier.jpg')}
+                                style={GlobalStyles.headerIcon}
+                            />
 
-                            // Style provenant de votre fichier GlobalStyles.js
-                            style={GlobalStyles.headerIcon}
-                        />
+                            {/* INSERER CE BLOC ICI : */}
+                            {nombreArticles > 0 && (
+                                <View style={{
+                                    position: 'absolute',
+                                    right: -5,
+                                    top: -5,
+                                    backgroundColor: '#FF3B30',
+                                    borderRadius: 10,
+                                    width: 18,
+                                    height: 18,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    borderWidth: 1.5,
+                                    borderColor: 'white'
+                                }}>
+                                    <Text style={{ color: 'white', fontSize: 10, fontWeight: 'bold' }}>
+                                        {nombreArticles}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
                     </TouchableOpacity>
                 ),
-            }}
+            })}
         >
             {/* Écran d'accueil - Toujours visible */}
             <Drawer.Screen name="Home" component={Home} options={{title: "Accueil"}}/>

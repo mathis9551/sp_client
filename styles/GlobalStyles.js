@@ -142,6 +142,11 @@ export const GlobalStyles = StyleSheet.create({
         fontWeight: '700',
         color: '#333',
     },
+    profileNamee: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#000000',
+    },
     profileCard: {
         backgroundColor: '#ffffff', // Fond blanc
         borderRadius: 12,
